@@ -7,6 +7,7 @@ import 'exams/2016_exit.dart';
 import 'exams/aastu_model.dart';
 import 'exams/examJimmaMock2024.dart';
 import 'exams/MoEE2023.dart';
+
 void main() {
   runApp(const SoftExitApp());
 }
@@ -59,7 +60,10 @@ class _HomePageState extends State<HomePage> {
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.all(20.0),
+            padding: EdgeInsets.symmetric(
+              horizontal: MediaQuery.of(context).size.width > 600 ? 24 : 16,
+              vertical: 20,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -92,24 +96,32 @@ class _HomePageState extends State<HomePage> {
                 // Exams Section
                 const SectionHeader(title: 'Practice Exams'),
                 const SizedBox(height: 16),
-                GridView.count(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  childAspectRatio: 1.1,
-                  children: exams.map((exam) => ExamCard(
-                    exam: exam,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => QuizScreen(exam: exam),
-                        ),
-                      );
-                    },
-                  )).toList(),
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final width = constraints.maxWidth;
+                    int crossAxisCount = width > 800 ? 3 : 2;
+                    double childAspectRatio = width > 600 ? 1.0 : 1.1;
+
+                    return GridView.count(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      crossAxisCount: crossAxisCount,
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                      childAspectRatio: childAspectRatio,
+                      children: exams.map((exam) => ExamCard(
+                        exam: exam,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => QuizScreen(exam: exam),
+                            ),
+                          );
+                        },
+                      )).toList(),
+                    );
+                  },
                 ),
                 const SizedBox(height: 32),
                 
@@ -160,7 +172,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                       const SizedBox(height: 8),
                       const Text(
-                        'Developed by Firaol Tesfaye, 2025 JU GC,  to help students prepare for software engineering exit exams. This app provides practice questions from previous years and additional learning resources.',
+                        'Developed by Firaol Tesfaye, 2025 JU GC, to help students prepare for software engineering exit exams. This app provides practice questions from previous years and additional learning resources.',
                         style: TextStyle(
                           fontSize: 14,
                           color: Colors.grey,
@@ -228,6 +240,8 @@ class ExamCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isLargeScreen = MediaQuery.of(context).size.width > 600;
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -237,35 +251,37 @@ class ExamCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: EdgeInsets.all(isLargeScreen ? 16 : 12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                padding: const EdgeInsets.all(6),
+                padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: const Color(0xFFB80C09).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.quiz,
-                  color: Color(0xFFB80C09),
-                  size: 24,
+                  color: const Color(0xFFB80C09),
+                  size: isLargeScreen ? 28 : 24,
                 ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                exam.title,
+                style: TextStyle(
+                  fontSize: isLargeScreen ? 16 : 14,
+                  fontWeight: FontWeight.bold,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 8),
               Text(
-                exam.title,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
                 '${exam.questions.length} questions',
                 style: TextStyle(
-                  fontSize: 11,
+                  fontSize: isLargeScreen ? 14 : 12,
                   color: Colors.grey[600],
                 ),
               ),

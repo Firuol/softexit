@@ -3,7 +3,7 @@ import '../models/exam_model.dart';
 
 final Exam examJimmaMock2024 = Exam(
   id: 'jimma_mock_2024',
-  title: 'JU Mock Exit Exam 2024',
+  title: 'JU Mock Exit 2024',
   year: 2024,
   type: 'mock',
   questions: [
