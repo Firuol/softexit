@@ -1,5 +1,12 @@
 import 'package:flutter/material.dart';
-
+import 'quiz_screen.dart';
+import 'models/exam_model.dart';
+import 'exams/2016_jumodel.dart';
+import 'exams/2015_exit.dart';
+import 'exams/2016_exit.dart';
+import 'exams/aastu_model.dart';
+import 'exams/examJimmaMock2024.dart';
+import 'exams/MoEE2023.dart';
 void main() {
   runApp(const SoftExitApp());
 }
@@ -14,7 +21,7 @@ class SoftExitApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.deepPurple,
+          seedColor: const Color(0xFFB80C09),
           brightness: Brightness.light,
         ),
         useMaterial3: true,
@@ -24,8 +31,27 @@ class SoftExitApp extends StatelessWidget {
   }
 }
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  late final List<Exam> exams;
+
+  @override
+  void initState() {
+    super.initState();
+    exams = [
+      exitExam2015,
+      softwareExitExam,
+      examJimmaMock2024,
+      exam2016Exit,
+      exam2016JUModel,
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,11 +64,11 @@ class HomePage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const SizedBox(height: 20),
-                // Logo and App Name - Using Icon instead of SVG to avoid asset issues
+                // Logo and App Name
                 const Icon(
                   Icons.school,
                   size: 80,
-                  color: Colors.deepPurple,
+                  color: Color(0xFFB80C09),
                 ),
                 const SizedBox(height: 16),
                 const Text(
@@ -50,7 +76,7 @@ class HomePage extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
-                    color: Colors.deepPurple,
+                    color: Color(0xFFB80C09),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -72,15 +98,18 @@ class HomePage extends StatelessWidget {
                   crossAxisCount: 2,
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
-                  childAspectRatio: 1.1, // Adjusted aspect ratio
-                  children: const [
-                    ExamCard(title: '2016 Exit', questions: 120),
-                    ExamCard(title: '2016 JU Model', questions: 100),
-                    ExamCard(title: '2015 Exit', questions: 110),
-                    ExamCard(title: 'AASTU Model', questions: 90),
-                    ExamCard(title: '2017 Exit', questions: 115),
-                    ExamCard(title: '2018 Exit', questions: 125),
-                  ],
+                  childAspectRatio: 1.1,
+                  children: exams.map((exam) => ExamCard(
+                    exam: exam,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => QuizScreen(exam: exam),
+                        ),
+                      );
+                    },
+                  )).toList(),
                 ),
                 const SizedBox(height: 32),
                 
@@ -88,7 +117,7 @@ class HomePage extends StatelessWidget {
                 const SectionHeader(title: 'Resources'),
                 const SizedBox(height: 16),
                 SizedBox(
-                  height: 110, // Increased height slightly
+                  height: 110,
                   child: ListView(
                     scrollDirection: Axis.horizontal,
                     children: const [
@@ -141,7 +170,7 @@ class HomePage extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       const Text(
-                        'Developed by [Your Name] to help students prepare for software engineering exit exams. This app provides practice questions from previous years and additional learning resources.',
+                        'Developed by Firaol Tesfaye, 2025 JU GC,  to help students prepare for software engineering exit exams. This app provides practice questions from previous years and additional learning resources.',
                         style: TextStyle(
                           fontSize: 14,
                           color: Colors.grey,
@@ -198,13 +227,13 @@ class SectionHeader extends StatelessWidget {
 }
 
 class ExamCard extends StatelessWidget {
-  final String title;
-  final int questions;
+  final Exam exam;
+  final VoidCallback onTap;
 
   const ExamCard({
     super.key,
-    required this.title,
-    required this.questions,
+    required this.exam,
+    required this.onTap,
   });
 
   @override
@@ -216,39 +245,37 @@ class ExamCard extends StatelessWidget {
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        onTap: () {
-          // Navigate to exam screen
-        },
+        onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.all(12), // Reduced padding
+          padding: const EdgeInsets.all(12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                padding: const EdgeInsets.all(6), // Reduced padding
+                padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: Colors.deepPurple.withOpacity(0.1),
+                  color: const Color(0xFFB80C09).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(
                   Icons.quiz,
-                  color: Colors.deepPurple,
-                  size: 24, // Reduced icon size
+                  color: Color(0xFFB80C09),
+                  size: 24,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
-                title,
+                exam.title,
                 style: const TextStyle(
-                  fontSize: 14, // Reduced font size
+                  fontSize: 14,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
-                '$questions questions',
+                '${exam.questions.length} questions',
                 style: TextStyle(
-                  fontSize: 11, // Reduced font size
+                  fontSize: 11,
                   color: Colors.grey[600],
                 ),
               ),
@@ -275,7 +302,7 @@ class ResourceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 100, // Reduced width
+      width: 100,
       child: Card(
         elevation: 2,
         shape: RoundedRectangleBorder(
@@ -293,14 +320,14 @@ class ResourceCard extends StatelessWidget {
               children: [
                 Icon(
                   icon,
-                  size: 28, // Reduced icon size
+                  size: 28,
                   color: color,
                 ),
                 const SizedBox(height: 8),
                 Text(
                   title,
                   style: const TextStyle(
-                    fontSize: 12, // Reduced font size
+                    fontSize: 12,
                     fontWeight: FontWeight.bold,
                   ),
                   textAlign: TextAlign.center,
