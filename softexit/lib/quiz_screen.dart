@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async'; // Add this import for Timer
 import '../models/exam_model.dart';
 
 class QuizScreen extends StatefulWidget {
@@ -15,8 +16,64 @@ class _QuizScreenState extends State<QuizScreen> {
   int correctAnswers = 0;
   int? selectedAnswerIndex;
   bool isAnswerChecked = false;
+  Duration remainingTime = const Duration(hours: 3); // 3-hour countdown
+  late Timer _timer;
 
   Question get currentQuestion => widget.exam.questions[currentQuestionIndex];
+
+  @override
+  void initState() {
+    super.initState();
+    _startTimer();
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  void _startTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (remainingTime.inSeconds > 0) {
+        setState(() {
+          remainingTime = remainingTime - const Duration(seconds: 1);
+        });
+      } else {
+        // Time's up!
+        _timer.cancel();
+        _showTimeUpDialog();
+      }
+    });
+  }
+
+  void _showTimeUpDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('Time Up!'),
+        content: const Text('The 3-hour time limit has expired.'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // Close dialog
+              Navigator.pop(context); // Return to previous screen
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    final hours = twoDigits(duration.inHours);
+    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final seconds = twoDigits(duration.inSeconds.remainder(60));
+    return '$hours:$minutes:$seconds';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +84,20 @@ class _QuizScreenState extends State<QuizScreen> {
         title: Text(widget.exam.title),
         backgroundColor: const Color(0xFFB80C09),
         foregroundColor: Colors.white,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Center(
+              child: Text(
+                _formatDuration(remainingTime),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -141,6 +212,7 @@ class _QuizScreenState extends State<QuizScreen> {
                         currentQuestionIndex++;
                       } else {
                         // Quiz completed
+                        _timer.cancel();
                         _showQuizCompletionDialog();
                       }
                     });
@@ -183,7 +255,7 @@ class _QuizScreenState extends State<QuizScreen> {
   Color _getOptionBackgroundColor(int index) {
     if (!isAnswerChecked) {
       return selectedAnswerIndex == index 
-          ? Colors.blue.withOpacity(0.1)  // Changed to blue
+          ? Colors.blue.withOpacity(0.1)
           : Colors.white;
     } else {
       if (index == currentQuestion.correctAnswerIndex) {
@@ -198,7 +270,7 @@ class _QuizScreenState extends State<QuizScreen> {
   Color _getOptionBorderColor(int index) {
     if (!isAnswerChecked) {
       return selectedAnswerIndex == index 
-          ? Colors.blue  // Changed to blue
+          ? Colors.blue
           : Colors.grey[300]!;
     } else {
       if (index == currentQuestion.correctAnswerIndex) {
@@ -213,7 +285,7 @@ class _QuizScreenState extends State<QuizScreen> {
   Color _getOptionTextColor(int index) {
     if (!isAnswerChecked) {
       return selectedAnswerIndex == index 
-          ? Colors.blue  // Changed to blue
+          ? Colors.blue
           : Colors.black;
     } else {
       if (index == currentQuestion.correctAnswerIndex) {
