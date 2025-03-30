@@ -132,19 +132,9 @@ class _HomePageState extends State<HomePage> {
                         color: Colors.red,
                       ),
                       ResourceCard(
-                        icon: Icons.article,
-                        title: 'Articles',
-                        color: Colors.green,
-                      ),
-                      ResourceCard(
                         icon: Icons.note,
                         title: 'Notes',
                         color: Colors.orange,
-                      ),
-                      ResourceCard(
-                        icon: Icons.question_answer,
-                        title: 'Q&A',
-                        color: Colors.purple,
                       ),
                     ],
                   ),

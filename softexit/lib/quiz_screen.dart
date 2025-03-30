@@ -183,7 +183,7 @@ class _QuizScreenState extends State<QuizScreen> {
   Color _getOptionBackgroundColor(int index) {
     if (!isAnswerChecked) {
       return selectedAnswerIndex == index 
-          ? const Color(0xFFB80C09).withOpacity(0.1)
+          ? Colors.blue.withOpacity(0.1)  // Changed to blue
           : Colors.white;
     } else {
       if (index == currentQuestion.correctAnswerIndex) {
@@ -198,7 +198,7 @@ class _QuizScreenState extends State<QuizScreen> {
   Color _getOptionBorderColor(int index) {
     if (!isAnswerChecked) {
       return selectedAnswerIndex == index 
-          ? const Color(0xFFB80C09)
+          ? Colors.blue  // Changed to blue
           : Colors.grey[300]!;
     } else {
       if (index == currentQuestion.correctAnswerIndex) {
@@ -213,7 +213,7 @@ class _QuizScreenState extends State<QuizScreen> {
   Color _getOptionTextColor(int index) {
     if (!isAnswerChecked) {
       return selectedAnswerIndex == index 
-          ? const Color(0xFFB80C09)
+          ? Colors.blue  // Changed to blue
           : Colors.black;
     } else {
       if (index == currentQuestion.correctAnswerIndex) {
