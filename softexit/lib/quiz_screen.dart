@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:async'; // Add this import for Timer
-import '../models/exam_model.dart';
+import 'dart:math'; // Add this import for Random
+import 'models/exam_model.dart';
+import 'models/exam_result.dart';
+import 'services/exam_result_service.dart';
 
 class QuizScreen extends StatefulWidget {
   final Exam exam;
@@ -18,12 +21,18 @@ class _QuizScreenState extends State<QuizScreen> {
   bool isAnswerChecked = false;
   Duration remainingTime = const Duration(hours: 3); // 3-hour countdown
   late Timer _timer;
+  late List<Question> shuffledQuestions;
+  final ExamResultService _resultService = ExamResultService();
+  final DateTime _startTime = DateTime.now();
 
-  Question get currentQuestion => widget.exam.questions[currentQuestionIndex];
+  Question get currentQuestion => shuffledQuestions[currentQuestionIndex];
 
   @override
   void initState() {
     super.initState();
+    // Create a copy of questions and shuffle them
+    shuffledQuestions = List<Question>.from(widget.exam.questions);
+    shuffledQuestions.shuffle(Random());
     _startTimer();
   }
 
@@ -298,23 +307,56 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 
   void _showQuizCompletionDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Quiz Completed'),
-        content: Text(
-          'You got $correctAnswers out of ${widget.exam.questions.length} questions correct!',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context); // Close dialog
-              Navigator.pop(context); // Return to home
-            },
-            child: const Text('OK'),
-          ),
-        ],
-      ),
+    final timeTaken = DateTime.now().difference(_startTime);
+    final result = ExamResult(
+      examId: widget.exam.id,
+      examTitle: widget.exam.title,
+      totalQuestions: widget.exam.questions.length,
+      correctAnswers: correctAnswers,
+      dateTime: DateTime.now(),
+      timeTaken: timeTaken,
     );
+
+    _resultService.saveExamResult(result).then((_) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Quiz Completed'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'You got $correctAnswers out of ${widget.exam.questions.length} questions correct!',
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Score: ${(correctAnswers / widget.exam.questions.length * 100).toStringAsFixed(1)}%',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Time taken: ${_formatDuration(timeTaken)}',
+                style: TextStyle(
+                  color: Colors.grey[600],
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Close dialog
+                Navigator.pop(context); // Return to home
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+    });
   }
 }

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'quiz_screen.dart';
 import 'models/exam_model.dart';
 import 'exams/2016_jumodel.dart';
@@ -7,8 +9,12 @@ import 'exams/2016_exit.dart';
 import 'exams/aastu_model.dart';
 import 'exams/examJimmaMock2024.dart';
 import 'exams/MoEE2023.dart';
+import 'exams/Moee2.dart';
+import 'screens/progress_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SharedPreferences.getInstance();
   runApp(const SoftExitApp());
 }
 
@@ -49,14 +55,31 @@ class _HomePageState extends State<HomePage> {
       exitExam2015,
       softwareExitExam,
       examJimmaMock2024,
-      exam2016Exit,
-      exam2016JUModel,
+      moeeModel2,
     ];
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: const Color(0xFFB80C09),
+        foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.analytics),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ProgressScreen(),
+                ),
+              );
+            },
+            tooltip: 'View Progress',
+          ),
+        ],
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -180,7 +203,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Version 1.0.0',
+                        'Version 1.0.1',
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.grey[600],
@@ -297,13 +320,22 @@ class ResourceCard extends StatelessWidget {
   final IconData icon;
   final String title;
   final Color color;
+  final String telegramLink;
 
   const ResourceCard({
     super.key,
     required this.icon,
     required this.title,
     required this.color,
+    this.telegramLink = 'https://t.me/SoftExit_Resources',
   });
+
+  Future<void> _launchTelegram() async {
+    final Uri url = Uri.parse(telegramLink);
+    if (!await launchUrl(url)) {
+      throw Exception('Could not launch $url');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -316,9 +348,7 @@ class ResourceCard extends StatelessWidget {
         ),
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
-          onTap: () {
-            // Navigate to resources
-          },
+          onTap: _launchTelegram,
           child: Padding(
             padding: const EdgeInsets.all(12),
             child: Column(
